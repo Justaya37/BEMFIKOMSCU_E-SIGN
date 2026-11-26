@@ -26,7 +26,7 @@
             <div class="flex items-center justify-between h-16">
                 <!-- Brand / Logo -->
                 <div class="flex items-center space-x-3">
-                    <a href="{{ route('dashboard') }}" class="flex items-center space-x-3 group">
+                    <a href="{{ auth()->check() ? route('dashboard') : route('verify.index') }}" class="flex items-center space-x-3 group">
                         <img src="{{ asset('images/logo_bem_fikom.png') }}" alt="Logo BEM FIKOM" class="h-10 w-auto object-contain bg-white/95 rounded px-1 py-0.5 shadow-xs">
                         <div class="border-l border-slate-700 pl-3">
                             <div class="font-bold text-sm leading-tight tracking-wide text-white flex items-center space-x-2">

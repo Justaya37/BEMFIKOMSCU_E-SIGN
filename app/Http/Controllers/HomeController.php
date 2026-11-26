@@ -40,7 +40,9 @@ class HomeController extends Controller
             return redirect()->route('verify.show', ['token' => $letter->verification_token]);
         }
 
-        return redirect()->route('home', ['tab' => 'query'])
+        $redirectRoute = auth()->check() ? 'dashboard' : 'verify.index';
+
+        return redirect()->route($redirectRoute, ['tab' => 'query'])
             ->withInput()
             ->with('query_error', "Surat dengan nomor/kode '{$query}' tidak ditemukan di sistem BEM FIKOM.");
     }

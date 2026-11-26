@@ -24,24 +24,30 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 
 /*
 |--------------------------------------------------------------------------
-| Protected Application Routes (Wajib Login untuk Semua Fitur)
+| Public Letter Verification Routes (Guest & Authenticated)
 |--------------------------------------------------------------------------
-| Seluruh akses verifikasi, pengecekan surat, pengunggahan, dan arsip
-| mewajibkan pengguna terotentikasi dalam sistem BEM FIKOM.
+| Seluruh akses verifikasi keaslian surat, pemindaian QR Code publik,
+| serta pengujian integritas file PDF (SHA-256) dapat diakses langsung oleh tamu/publik.
+*/
+Route::get('/verify', [HomeController::class, 'index'])->name('verify.index');
+Route::post('/verify/query', [HomeController::class, 'checkQuery'])->name('verify.query');
+Route::post('/verify/integrity', [HomeController::class, 'checkIntegrity'])->name('verify.integrity');
+
+Route::get('/verify/{token}', [VerificationController::class, 'show'])->name('verify.show');
+Route::get('/verify/{token}/download', [VerificationController::class, 'download'])->name('verify.download');
+Route::get('/verify/{token}/preview', [VerificationController::class, 'preview'])->name('verify.preview');
+
+/*
+|--------------------------------------------------------------------------
+| Protected Application Routes (Internal Pengurus BEM)
+|--------------------------------------------------------------------------
+| Manajemen pengajuan surat, antrean persetujuan, otorisasi PIN X.509,
+| log aktivitas sistem, dan konfigurasi tanda tangan terlindungi middleware auth.
 */
 Route::middleware('auth')->group(function () {
     // Root & Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('home');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-    // Fitur Cek & Uji Integritas Dokumen
-    Route::post('/verify/query', [HomeController::class, 'checkQuery'])->name('verify.query');
-    Route::post('/verify/integrity', [HomeController::class, 'checkIntegrity'])->name('verify.integrity');
-
-    // Halaman Hasil Scan QR & Download Resmi (Wajib Login)
-    Route::get('/verify/{token}', [VerificationController::class, 'show'])->name('verify.show');
-    Route::get('/verify/{token}/download', [VerificationController::class, 'download'])->name('verify.download');
-    Route::get('/verify/{token}/preview', [VerificationController::class, 'preview'])->name('verify.preview');
 
     // Pengajuan & Daftar Surat (Daftar mengarah ke dashboard arsip)
     Route::get('/letters', [DashboardController::class, 'index'])->name('letters.index');

@@ -58,14 +58,22 @@ class EsignWorkflowTest extends TestCase
         $response->assertSee('Uji Integritas File PDF (Anti-Edit SHA-256)');
     }
 
-    public function test_guest_accessing_verify_is_redirected_to_login(): void
+    public function test_guest_can_access_public_verification_without_login(): void
     {
         $letter = Letter::where('status', 'approved')->first();
         $this->assertNotNull($letter);
 
-        // Guest must be redirected to login
+        // Public guest can access verification page directly with 200 OK without login
         $response = $this->get('/verify/' . $letter->verification_token);
-        $response->assertRedirect('/login');
+        $response->assertStatus(200);
+        $response->assertSee('SURAT RESMI SAH & TERDAFTAR', false);
+        $response->assertSee($letter->letter_number);
+        $response->assertSee($letter->file_hash);
+
+        // Public verify lookup page is also accessible as guest
+        $verifyIndexResponse = $this->get('/verify');
+        $verifyIndexResponse->assertStatus(200);
+        $verifyIndexResponse->assertSee('Verifikasi Keaslian Dokumen & Surat Resmi');
     }
 
     public function test_authenticated_user_can_verify_letter_qr(): void

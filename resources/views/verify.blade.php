@@ -10,9 +10,15 @@
         <div class="flex items-center space-x-3">
             <img src="{{ asset('images/logo_bem_fikom.png') }}" alt="Logo BEM FIKOM" class="h-12 w-auto object-contain">
         </div>
-        <a href="{{ route('dashboard') }}" class="text-xs text-slate-500 hover:text-slate-800 font-medium">
-            &larr; Kembali ke Dashboard
-        </a>
+        @auth
+            <a href="{{ route('dashboard') }}" class="text-xs text-slate-500 hover:text-slate-800 font-medium">
+                &larr; Kembali ke Dashboard
+            </a>
+        @else
+            <a href="{{ route('verify.index') }}" class="text-xs text-slate-500 hover:text-slate-800 font-medium">
+                &larr; Cek Nomor / Dokumen Lain
+            </a>
+        @endauth
     </div>
 
     <!-- Flash notification if redirected from home integrity test -->
