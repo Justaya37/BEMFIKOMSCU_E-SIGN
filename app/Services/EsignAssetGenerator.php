@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use TCPDF;
 
@@ -12,19 +13,50 @@ class EsignAssetGenerator
      */
     public static function generateAll(bool $force = false): void
     {
+        $publicDir = storage_path('app/public');
+        $privateDir = storage_path('app/private');
         $assetsDir = storage_path('app/private/assets');
+        $certsDir = storage_path('app/private/certs');
         $signaturesDir = storage_path('app/private/signatures');
         $draftsDir = storage_path('app/private/drafts');
+        $signedDir = storage_path('app/private/signed');
 
+        File::ensureDirectoryExists($publicDir);
+        File::ensureDirectoryExists($privateDir);
         File::ensureDirectoryExists($assetsDir);
+        File::ensureDirectoryExists($certsDir);
         File::ensureDirectoryExists($signaturesDir);
         File::ensureDirectoryExists($draftsDir);
+        File::ensureDirectoryExists($signedDir);
 
+        // 1. Cap Stempel BEM FIKOM: prioritaskan salin dari public/images jika ada
         $capPath = $assetsDir . '/cap_bem.png';
-        if (!File::exists($capPath)) {
-            self::generateCapBem($capPath);
+        if (!File::exists($capPath) || $force) {
+            $publicCap = public_path('images/cap_bem.png');
+            if (File::exists($publicCap)) {
+                File::copy($publicCap, $capPath);
+            } else {
+                self::generateCapBem($capPath);
+            }
         }
 
+        // 2. Logo Resmi BEM FIKOM
+        $logoPath = $assetsDir . '/logo_bem_fikom.png';
+        if (!File::exists($logoPath) || $force) {
+            $publicLogo = public_path('images/logo_bem_fikom.png');
+            if (File::exists($publicLogo)) {
+                File::copy($publicLogo, $logoPath);
+            }
+        }
+
+        // 3. Sertifikat Digital X.509 & Kunci Privat RSA
+        $certPath = $certsDir . '/bem_fikom.crt';
+        $keyPath = $certsDir . '/bem_fikom.key';
+        if (!File::exists($certPath) || !File::exists($keyPath) || $force) {
+            Artisan::call('esign:generate-cert', ['--force' => $force]);
+        }
+
+        // 4. Coretan Tanda Tangan Digital Pejabat
         $ttdKetuaPath = $signaturesDir . '/ttd_ketua.png';
         if (!File::exists($ttdKetuaPath) || $force) {
             self::generateSignature($ttdKetuaPath, 'M. Fikri Al-Habsyi', 'Ketua BEM');
@@ -35,6 +67,7 @@ class EsignAssetGenerator
             self::generateSignature($ttdWakilPath, 'Dina Permata Sari', 'Wakil Ketua BEM');
         }
 
+        // 5. Berkas Draf Contoh PDF
         $draftPath = $draftsDir . '/sample_draft.pdf';
         if (!File::exists($draftPath) || $force) {
             self::generateSampleDraftPdf($draftPath);

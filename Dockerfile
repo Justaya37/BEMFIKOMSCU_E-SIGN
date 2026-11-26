@@ -27,4 +27,4 @@ RUN chmod -R 775 storage bootstrap/cache
 ENV PHP_CLI_SERVER_WORKERS=4
 EXPOSE 8080
 
-CMD ["sh", "-c", "php artisan storage:link || true && php artisan migrate --force || true && php artisan serve --host=0.0.0.0 --port=${PORT:-8080}"]
+CMD ["sh", "-c", "mkdir -p /app/storage/app/public /app/storage/app/private/assets /app/storage/app/private/certs /app/storage/app/private/drafts /app/storage/app/private/signatures /app/storage/app/private/signed && chmod -R 775 /app/storage /app/bootstrap/cache && rm -rf /app/public/storage && php artisan storage:link && php artisan esign:init-storage && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-8080}"]
