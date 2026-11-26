@@ -19,6 +19,7 @@ COPY . .
 # Install dependency PHP & compile asset Vite
 RUN composer install --no-dev --optimize-autoloader --no-interaction \
     && npm install \
+    && rm -f public/hot \
     && npm run build
 
 RUN chmod -R 775 storage bootstrap/cache
